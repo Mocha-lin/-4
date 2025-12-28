@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>bbb 投資戰情室 (Ultimate UI)</title>
-    <!-- Libs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
@@ -41,7 +40,6 @@
 </head>
 <body class="flex flex-col">
 
-    <!-- Loading -->
     <div id="processingOverlay" class="loading-overlay">
         <div class="text-[#8B7355] text-6xl mb-6"><i class="fas fa-circle-notch fa-spin"></i></div>
         <h2 class="text-2xl font-bold">正在呼叫 bbb 戰情室...</h2>
@@ -49,7 +47,6 @@
         <p class="text-sm text-gray-400 mt-6 animate-pulse">預計耗時 1-2 分鐘，請勿關閉視窗</p>
     </div>
 
-    <!-- Import Modal -->
     <div id="jsonModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center">
         <div class="bg-white w-3/4 h-4/5 rounded-2xl shadow-2xl flex flex-col p-8">
             <div class="flex justify-between items-center mb-4">
@@ -63,7 +60,6 @@
         </div>
     </div>
 
-    <!-- Header -->
     <header class="bg-[#ECE8DE] h-16 flex items-center px-6 border-b border-[#DCD6C9] justify-between shrink-0 shadow-sm z-20">
         <div class="font-black text-2xl tracking-widest text-[#5A4A42]">bbb ANALYTICS <span class="text-sm font-medium text-gray-500 ml-1 align-top">UI+</span></div>
         <div class="flex items-center gap-4">
@@ -79,7 +75,6 @@
 
     <div class="flex flex-1 overflow-hidden">
         
-        <!-- Left Sidebar (Wide & Big Text) -->
         <aside class="w-[25%] min-w-[300px] bg-[#F5F2EB] border-r border-[#E5E0D8] flex flex-col z-10 shadow-lg">
             <div class="p-4 border-b border-[#E5E0D8] bg-[#F5F2EB]">
                 <div class="relative group">
@@ -91,7 +86,6 @@
             <div id="stockList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
         </aside>
 
-        <!-- Main Content -->
         <main class="flex-1 overflow-y-auto bg-[#FDFBF7] p-8 scroll-smooth" id="mainBoard">
             <div id="emptyState" class="h-full flex flex-col items-center justify-center text-gray-300 select-none">
                 <i class="fas fa-folder-open text-9xl mb-6 opacity-30"></i>
@@ -100,7 +94,6 @@
 
             <div id="dashboard" class="hidden max-w-[1600px] mx-auto space-y-8 pb-24">
                 
-                <!-- 1. Stock Title Header -->
                 <div class="flex flex-col md:flex-row justify-between items-end border-b-4 border-[#8B7355] pb-6">
                     <div>
                         <div class="flex items-baseline gap-4 mb-2">
@@ -121,7 +114,6 @@
                     </div>
                 </div>
 
-                <!-- 2. AI Qualitative -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="col-span-2 glass-panel p-6">
                         <div class="header-title text-[#8B7355]">產業地位與 AI 觀點</div>
@@ -137,14 +129,12 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Memo -->
                     <div class="col-span-1 glass-panel bg-[#FFFDF5] border-[#E8E0C0] p-6 flex flex-col">
                         <div class="header-title text-[#8B7355] border-[#DCD6C9] mb-4"><span><i class="fas fa-pen-alt mr-2"></i>投資筆記</span></div>
                         <textarea id="d_memo" class="flex-1 w-full bg-transparent border-none text-base resize-none focus:ring-0 leading-relaxed text-gray-600 h-full" placeholder="寫下你的觀察..."></textarea>
                     </div>
                 </div>
 
-                <!-- 3. News (Larger) -->
                 <div class="glass-panel p-6">
                     <div class="header-title text-[#8B7355]">消息面事實</div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -153,9 +143,7 @@
                     </div>
                 </div>
 
-                <!-- 4. Financial Charts (Correct Sort) -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- EPS -->
                     <div class="glass-panel p-6">
                         <div class="header-title text-[#8B7355]">
                             EPS 成長 <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2 font-normal">藍字為預估</span>
@@ -168,7 +156,6 @@
                             </table>
                         </div>
                     </div>
-                    <!-- Revenue (Chart Sorted Left->Right = Old->New) -->
                     <div class="glass-panel p-6">
                         <div class="header-title text-[#8B7355]">月營收趨勢 <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded ml-2 font-normal cursor-pointer">點擊表格修改</span></div>
                         <div class="h-64 mb-6"><canvas id="chart_rev"></canvas></div>
@@ -181,7 +168,6 @@
                     </div>
                 </div>
 
-                <!-- 5. PE River -->
                 <div class="glass-panel p-6">
                     <div class="header-title text-[#8B7355]">
                         估值河流圖 (Valuation)
@@ -194,7 +180,6 @@
                     <div class="h-[500px] w-full relative"><canvas id="chart_river"></canvas></div>
                 </div>
 
-                <!-- 6. Tech -->
                 <div class="glass-panel p-6 border-l-[8px] border-[#8B7355]">
                     <div class="header-title text-[#8B7355]">技術與籌碼 AI 策略 <span id="d_c" class="ml-4 text-sm bg-gray-100 px-3 py-1 rounded text-gray-500 font-mono">--</span></div>
                     <p class="text-base text-gray-700 mb-8 leading-8 text-justify font-medium" id="d_tech_txt">--</p>
@@ -225,7 +210,6 @@
                     </div>
                 </div>
 
-                <!-- 7. Div -->
                 <div class="glass-panel p-5 flex justify-between text-base font-bold text-gray-700 items-center">
                     <span class="text-[#8B7355] text-lg"><i class="fas fa-coins mr-3"></i> 股利政策</span>
                     <span class="font-mono bg-gray-50 px-4 py-2 rounded border">Yield: <span id="d_yield">--</span></span>
@@ -237,7 +221,6 @@
         </main>
     </div>
 
-    <!-- Script -->
     <script>
         // ------------------------------------------
         // ⚠️ SETUP
@@ -321,7 +304,6 @@
                     const col = chg>=0?"text-[#C0392B]":"text-[#16A34A]";
 
                     d.className = `p-4 rounded-xl cursor-pointer border transition-all hover:shadow-md flex justify-between items-center ${style}`;
-                    // Layout: Left (Name Big, ID Small) Right (Price)
                     d.innerHTML = `
                         <div>
                             <div class="text-lg font-bold text-[#2C3E50] mb-0.5">${s.name}</div>
@@ -367,7 +349,10 @@
             setText('d_comp', s.industry.competitors);
             const m = document.getElementById('d_memo');
             m.value = s.memo||"";
-            m.oninput = ()=>{ s.memo=m.value; saveToLocal(); };
+            m.oninput = ()=>{ 
+                const target = db.find(x => x.id === currentStockId);
+                if(target) { target.memo = m.value; saveToLocal(); }
+            };
 
             // 3. Tables (Newest -> Oldest) & Editable
             renderEditableTable('t_eps', s.financials.eps_table||[], ['period','gross_margin','net_margin','eps','cumulative']);
@@ -405,7 +390,7 @@
             setText('d_roi_h', s.dividend.history_roi);
             setText('d_roi_f', s.dividend.future_roi);
 
-            renderCharts(s, rData); // Pass sorted revenue data
+            renderCharts(s, rData); 
         }
 
         function renderEditableTable(domId, data, keys) {
@@ -413,6 +398,9 @@
             data.forEach((r,idx) => {
                 const cls = r.is_estimate ? 'est-row' : 'fact-row';
                 const tag = r.is_estimate ? '<span class="est-tag">預</span>' : '';
+                // 使用唯一識別碼 (Period 或 Month) 傳入 updateCell
+                const idValue = r.period || r.month; 
+
                 let h = `<tr class="${cls}">`;
                 keys.forEach((k,i)=>{
                     const align = i===0?'text-left':'text-right editable';
@@ -423,22 +411,42 @@
                     if(!val.includes('-') && (k.includes('yoy')||k.includes('mom'))) valColor = 'text-red-600 font-bold';
                     
                     if(i===0) h+=`<td class="${align}">${val}${tag}</td>`;
-                    else h+=`<td class="${align} ${valColor}" contenteditable="true" onblur="updateCell('${domId}',${idx},'${k}',this.innerText)">${val}</td>`;
+                    else h+=`<td class="${align} ${valColor}" contenteditable="true" onblur="updateCell('${domId}','${idValue}','${k}',this.innerText)">${val}</td>`;
                 });
                 el.innerHTML += h+'</tr>';
             });
         }
 
-        function updateCell(tableId, rowIdx, key, val) {
-            // Logic to update `db` needed. Simplified for UI demo.
-            // Ideally, we traverse `db` -> currentStockId -> match row. 
-            // Here just UI persistence for demo:
-            console.log(`Update ${tableId} row ${rowIdx} key ${key} to ${val}`);
-            saveToLocal(); // Need real reference mapping in prod
+        function updateCell(tableId, idValue, key, val) {
+            // 1. 找到當前股票
+            const s = db.find(x => x.id === currentStockId);
+            if (!s) return;
+
+            let targetArray = null;
+            let findKey = "";
+
+            // 2. 判斷要修改哪個 Array
+            if(tableId === 't_eps') {
+                targetArray = s.financials.eps_table;
+                findKey = "period";
+            } else if(tableId === 't_rev') {
+                targetArray = s.financials.revenue_trend;
+                findKey = "month";
+            }
+
+            // 3. 執行修改並存檔
+            if(targetArray) {
+                const row = targetArray.find(item => item[findKey] === idValue);
+                if(row) {
+                    row[key] = val;
+                    saveToLocal(); // 寫入 localStorage
+                    console.log(`Saved ${key}=${val} for ${idValue}`);
+                }
+            }
         }
 
         function renderCharts(s, revDataSortedDesc) {
-            // PE River
+            // PE River (Modified for Color Fill)
             const ctxPe = document.getElementById('chart_river').getContext('2d');
             if(charts.river) charts.river.destroy();
             const rd = s.financials.valuation.pe_river_data;
@@ -448,12 +456,41 @@
                     data: {
                         labels: rd.dates,
                         datasets: [
-                            { label:'Price', data:rd.price, borderColor:'#374151', borderWidth:3, pointRadius:0, tension:0.2 },
-                            { label:'High', data:rd.pe20, borderColor:'#DC2626', borderDash:[6,6], borderWidth:1.5, pointRadius:0, fill:false },
-                            { label:'Low', data:rd.pe12, borderColor:'#16A34A', borderDash:[6,6], borderWidth:1.5, pointRadius:0, fill:false }
+                            { 
+                                label:'Price', 
+                                data:rd.price, 
+                                borderColor:'#374151', 
+                                borderWidth:3, 
+                                pointRadius:0, 
+                                tension:0.2,
+                                z: 10 // Ensure price is on top
+                            },
+                            { 
+                                label:'High (PE20)', 
+                                data:rd.pe20, 
+                                borderColor:'#DC2626', 
+                                borderWidth:1.5, 
+                                pointRadius:0, 
+                                backgroundColor: 'rgba(220, 38, 38, 0.05)', // 淡紅色背景
+                                fill: 2 // 填充直到下一個 Dataset (Idx 2)
+                            },
+                            { 
+                                label:'Low (PE12)', 
+                                data:rd.pe12, 
+                                borderColor:'#16A34A', 
+                                borderWidth:1.5, 
+                                pointRadius:0, 
+                                backgroundColor: 'rgba(22, 163, 74, 0.05)', // 淡綠色背景
+                                fill: false 
+                            }
                         ]
                     },
-                    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'bottom'}}, elements:{point:{radius:0}} }
+                    options: { 
+                        responsive:true, 
+                        maintainAspectRatio:false, 
+                        plugins:{legend:{position:'bottom'}}, 
+                        elements:{point:{radius:0}} 
+                    }
                 });
             }
 
