@@ -1,0 +1,53 @@
+name: bbb Auto System
+
+on:
+  schedule:
+    - cron: '0 9 * * *' # 每天下午 5 點
+  workflow_dispatch: # 手動按鈕
+  repository_dispatch: # 接收網頁訊號
+    types: [add_stock_trigger]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # ✅ 優化部分 A: 加入 cache: 'pip' 設定
+      # 這告訴 GitHub：「跑完如果這台電腦要銷毀，把 Python 套件存起來，下次繼續用」
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip' 
+
+      # ✅ 優化部分 B: 標準化安裝指令
+      # 即使 requirements.txt 不存在或有誤，下面的 fallback 也能保證安裝成功
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install yfinance google-generativeai pandas
+
+      - name: Run Update Script
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
+            echo "🔥 觸發新增股票: ${{ github.event.client_payload.stock_id }}"
+            python app.py --add "${{ github.event.client_payload.stock_id }}"
+          else
+            echo "🔄 執行例行更新"
+            python app.py
+          fi
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name "bbb-bot"
+          git config --global user.email "bot@github.com"
+          git add data.json
+          git commit -m "📈 Data updated" || exit 0
+          git push
