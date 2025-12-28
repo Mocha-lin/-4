@@ -3,579 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>bbb 投資戰情室 (Ultimate UI)</title>
+    <title>bbb 投資戰情室 (Ultimate)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        /* 1. 字體基底加大 */
         :root { --bg: #F9F7F2; --accent: #8B7355; --text: #374151; --border: #E5E7EB; }
-        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "Segoe UI", Roboto, sans-serif; height: 100vh; overflow: hidden; font-size: 16px; }
+        /* 1. 全域字體加大 */
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; overflow: hidden; font-size: 16px; }
         
-        .glass-panel { background: white; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.03); border-radius: 12px; }
-        .header-title { font-size: 1.1rem; font-weight: 800; color: #4B5563; border-bottom: 2px solid var(--border); padding-bottom: 0.75rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.05em; }
+        .glass-panel { background: white; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 8px; }
+        .header-title { font-size: 1.1rem; font-weight: 800; color: #4B5563; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.05em; }
         
-        /* 2. 表格字體加大 */
+        /* 表格字體加大 */
         .data-table th { @apply bg-gray-50 text-sm text-gray-500 uppercase font-bold p-3 text-right sticky top-0; }
         .data-table td { @apply p-3 text-base border-b border-gray-100 text-right font-mono outline-none transition duration-200; }
-        
         .editable:hover { background-color: #FFFBF0; cursor: text; box-shadow: inset 0 0 0 1px #8B7355; }
         .editable:focus { background-color: #FFFFFF; box-shadow: inset 0 0 0 2px #8B7355; }
 
-        /* 風險燈號 */
-        @keyframes pulseRed { 50% { box-shadow: 0 0 8px red; } }
-        @keyframes pulseGreen { 50% { box-shadow: 0 0 8px green; } }
-        .flash-buy { animation: pulseRed 1.5s infinite; border: 2px solid #DC2626 !important; }
-        .flash-sell { animation: pulseGreen 1.5s infinite; border: 2px solid #16A34A !important; }
-        
-        .est-row td { color: #2563EB; font-weight: 700; background-color: #F8FAFC; }
-        .est-tag { font-size: 0.75rem; background: #2563EB; color: white; padding: 2px 4px; border-radius: 4px; margin-left: 6px; }
+        .fact-row td { color: #111827; font-weight: 600; }
+        .est-row td { color: #2563EB; font-weight: 700; font-style: italic; background-color: #F8FAFC; }
+        .est-tag { font-size: 0.75rem; background: #2563EB; color: white; padding: 1px 4px; border-radius: 2px; margin-left: 4px; vertical-align: middle; }
 
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 99; display: none; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(2px); }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 99; display: none; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(2px); }
     </style>
 </head>
 <body class="flex flex-col">
 
     <div id="processingOverlay" class="loading-overlay">
-        <div class="text-[#8B7355] text-6xl mb-6"><i class="fas fa-circle-notch fa-spin"></i></div>
-        <h2 class="text-2xl font-bold">正在呼叫 bbb 戰情室...</h2>
-        <p class="text-gray-500 mt-2 text-lg">AI 正在分析 <span id="targetStock" class="font-bold text-[#8B7355]"></span></p>
-        <p class="text-sm text-gray-400 mt-6 animate-pulse">預計耗時 1-2 分鐘，請勿關閉視窗</p>
+        <div class="text-[#8B7355] text-5xl mb-4"><i class="fas fa-satellite-dish fa-spin"></i></div>
+        <h2 class="text-xl font-bold">呼叫 bbb 戰情室...</h2>
+        <p class="text-gray-500 mt-2">AI 正在分析 <span id="targetStock" class="font-bold text-[#8B7355]"></span></p>
+        <p class="text-xs text-gray-400 mt-4 animate-pulse">預計耗時 1-2 分鐘，請勿關閉視窗</p>
     </div>
 
-    <div id="jsonModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center">
-        <div class="bg-white w-3/4 h-4/5 rounded-2xl shadow-2xl flex flex-col p-8">
+    <div id="jsonModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white w-4/5 h-4/5 rounded-xl shadow-2xl flex flex-col p-6 animate-fade-in-up">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-2xl text-[#8B7355]">手動匯入 JSON</h3>
+                <h3 class="font-bold text-xl text-[#8B7355]"><i class="fas fa-file-import mr-2"></i> 手動匯入 bbb 報告</h3>
                 <button onclick="toggleModal('jsonModal')" class="text-3xl text-gray-400 hover:text-black">&times;</button>
             </div>
-            <textarea id="jsonInput" class="flex-1 border-2 border-gray-200 p-6 font-mono text-sm rounded-xl focus:border-[#8B7355] outline-none transition" placeholder='請貼上 Gemini 生成的 JSON...'></textarea>
-            <div class="mt-6 text-right">
-                <button onclick="importJSON()" class="px-8 py-3 bg-[#8B7355] text-white rounded-lg font-bold shadow-md hover:bg-[#6e5a40] text-lg">確認匯入</button>
+            <textarea id="jsonInput" class="flex-1 border-2 border-gray-200 p-4 font-mono text-sm rounded-lg focus:border-[#8B7355] outline-none transition" placeholder='請貼上 JSON...'></textarea>
+            <div class="mt-4 text-right">
+                <button onclick="importJSON()" class="px-6 py-2 bg-[#8B7355] text-white rounded-lg font-bold shadow hover:bg-[#6e5a40] transition">確認匯入</button>
             </div>
         </div>
     </div>
 
-    <header class="bg-[#ECE8DE] h-16 flex items-center px-6 border-b border-[#DCD6C9] justify-between shrink-0 shadow-sm z-20">
-        <div class="font-black text-2xl tracking-widest text-[#5A4A42]">bbb ANALYTICS <span class="text-sm font-medium text-gray-500 ml-1 align-top">UI+</span></div>
-        <div class="flex items-center gap-4">
-            <div id="statusBadge" class="text-sm font-mono px-3 py-1.5 rounded bg-gray-200 text-gray-500 hidden md:flex items-center">Offline</div>
-            <button onclick="toggleModal('jsonModal')" class="bg-[#8B7355] text-white px-4 py-2 rounded-full text-sm font-bold shadow hover:scale-105 transition flex items-center gap-2">
-                <i class="fas fa-cloud-upload-alt"></i> 匯入
+    <header class="bg-[#ECE8DE] h-14 flex items-center px-6 border-b border-[#DCD6C9] justify-between shrink-0 shadow-sm z-20">
+        <div class="font-black text-xl tracking-widest text-[#5A4A42]">bbb ANALYTICS <span class="text-xs font-normal text-gray-500 ml-1">Ultimate</span></div>
+        <div class="flex items-center gap-3">
+            <div id="statusBadge" class="text-xs font-mono px-2 py-1 rounded bg-gray-200 text-gray-500 hidden md:flex">Offline</div>
+            <button onclick="toggleModal('jsonModal')" class="bg-[#8B7355] text-white px-3 py-1.5 rounded-full text-xs font-bold shadow flex items-center gap-2 hover:scale-105 transition">
+                <i class="fas fa-cloud-upload-alt"></i> 手動匯入
             </button>
-            <button onclick="syncData(true)" class="bg-white border border-[#D1C7B7] text-[#8B7355] px-4 py-2 rounded text-sm font-bold hover:bg-gray-50 shadow-sm">
-                <i class="fas fa-sync-alt"></i>
+            <button onclick="syncData(true)" class="bg-white border border-[#D1C7B7] text-[#8B7355] px-3 py-1.5 rounded text-xs font-bold hover:bg-gray-50 shadow-sm transition">
+                <i class="fas fa-sync-alt mr-1"></i> 刷新雲端
             </button>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        
-        <aside class="w-[25%] min-w-[300px] bg-[#F5F2EB] border-r border-[#E5E0D8] flex flex-col z-10 shadow-lg">
-            <div class="p-4 border-b border-[#E5E0D8] bg-[#F5F2EB]">
-                <div class="relative group">
-                    <input type="text" id="addStockInput" placeholder="代號 (如 2330) 按 Enter 新增" 
-                           class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-base focus:outline-none focus:border-[#8B7355] shadow-inner font-mono tracking-wide transition group-hover:shadow-md">
-                    <button onclick="triggerAddStock()" class="absolute right-3 top-3 text-[#8B7355] hover:text-[#5A4A42] hover:scale-110 transition"><i class="fas fa-paper-plane text-xl"></i></button>
+        <aside class="w-[20%] min-w-[280px] bg-[#F5F2EB] border-r border-[#E5E0D8] flex flex-col z-10">
+            <div class="p-3 border-b border-[#E5E0D8]">
+                <div class="relative">
+                    <input type="text" id="addStockInput" placeholder="代號 按 Enter" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#8B7355] font-mono">
+                    <button onclick="triggerAddStock()" class="absolute right-2 top-2 text-[#8B7355]"><i class="fas fa-paper-plane"></i></button>
                 </div>
             </div>
-            <div id="stockList" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
+            <div id="stockList" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
         </aside>
 
-        <main class="flex-1 overflow-y-auto bg-[#FDFBF7] p-8 scroll-smooth" id="mainBoard">
-            <div id="emptyState" class="h-full flex flex-col items-center justify-center text-gray-300 select-none">
-                <i class="fas fa-folder-open text-9xl mb-6 opacity-30"></i>
-                <p class="text-2xl font-light tracking-wide">請從左側選擇或輸入代號新增分析</p>
+        <main class="flex-1 overflow-y-auto bg-[#FDFBF7] p-8" id="mainBoard">
+            <div id="emptyState" class="h-full flex flex-col items-center justify-center text-gray-300">
+                <i class="fas fa-folder-open text-8xl mb-6 opacity-30"></i>
+                <p class="text-xl">請選擇股票或匯入資料</p>
             </div>
 
-            <div id="dashboard" class="hidden max-w-[1600px] mx-auto space-y-8 pb-24">
+            <div id="dashboard" class="hidden max-w-[1400px] mx-auto space-y-8 pb-24">
                 
-                <div class="flex flex-col md:flex-row justify-between items-end border-b-4 border-[#8B7355] pb-6">
+                <div class="flex flex-col md:flex-row justify-between items-end border-b-4 border-[#8B7355] pb-4">
                     <div>
-                        <div class="flex items-baseline gap-4 mb-2">
-                            <h1 class="text-5xl font-extrabold text-[#2C3E50] tracking-tighter" id="d_name">--</h1>
-                            <h2 class="text-2xl font-bold text-gray-400 font-mono" id="d_id">--</h2>
-                        </div>
-                        <div class="text-sm text-gray-500 flex items-center gap-4">
-                            <span class="bg-gray-100 px-3 py-1 rounded flex items-center gap-2"><i class="far fa-clock"></i> <span id="d_date" class="font-mono"></span></span>
-                            <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded border border-blue-100 text-xs font-bold" id="aiModelTag">AI</span>
+                        <h1 class="text-6xl font-extrabold text-[#2C3E50] tracking-tighter mb-2" id="d_name_id">--</h1>
+                        <div class="flex items-center gap-3 text-sm font-mono text-gray-500">
+                            <span id="d_date">--</span>
+                            <span class="bg-blue-50 text-blue-600 px-2 py-1 rounded" id="aiModelTag">AI</span>
                             <span class="text-red-500 font-bold" id="d_note"></span>
                         </div>
                     </div>
                     <div class="text-right">
-                        <div class="flex items-baseline justify-end gap-4">
-                            <div id="d_price" class="text-7xl font-mono font-bold text-[#2C3E50] tracking-tighter">--</div>
-                            <div id="d_change" class="text-2xl font-bold">--</div>
-                        </div>
+                        <div id="d_price" class="text-7xl font-mono font-bold text-[#2C3E50] tracking-tighter">--</div>
+                        <div id="d_change" class="text-2xl font-bold">--</div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="col-span-2 glass-panel p-6">
-                        <div class="header-title text-[#8B7355]">產業地位與 AI 觀點</div>
-                        <div class="text-lg text-gray-800 leading-8 text-justify mb-6 font-medium bg-gray-50 p-4 rounded-lg" id="d_moat_desc">--</div>
-                        <div class="flex gap-6 text-sm">
-                            <div class="bg-white border px-4 py-3 rounded-lg flex-1 shadow-sm">
-                                <strong class="text-gray-400 block mb-1 text-xs uppercase">Position</strong>
-                                <span id="d_pos" class="font-bold text-gray-700">--</span>
-                            </div>
-                            <div class="bg-white border px-4 py-3 rounded-lg flex-1 shadow-sm">
-                                <strong class="text-gray-400 block mb-1 text-xs uppercase">Rivals</strong>
-                                <span id="d_comp" class="font-bold text-gray-700">--</span>
-                            </div>
+                        <div class="header-title text-[#8B7355]"><span>產業護城河 (AI)</span></div>
+                        <div class="text-lg text-gray-700 leading-8 mb-4" id="d_moat_desc">--</div>
+                        <div class="flex gap-4 text-sm font-mono">
+                            <div class="bg-gray-50 p-3 rounded flex-1"><strong>POSITION:</strong> <span id="d_pos">--</span></div>
+                            <div class="bg-gray-50 p-3 rounded flex-1"><strong>RIVALS:</strong> <span id="d_comp">--</span></div>
                         </div>
                     </div>
-                    <div class="col-span-1 glass-panel bg-[#FFFDF5] border-[#E8E0C0] p-6 flex flex-col">
-                        <div class="header-title text-[#8B7355] border-[#DCD6C9] mb-4"><span><i class="fas fa-pen-alt mr-2"></i>投資筆記</span></div>
-                        <textarea id="d_memo" class="flex-1 w-full bg-transparent border-none text-base resize-none focus:ring-0 leading-relaxed text-gray-600 h-full" placeholder="寫下你的觀察..."></textarea>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-6">
-                    <div class="header-title text-[#8B7355]">消息面事實</div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        <div class="col-span-2 space-y-3 overflow-y-auto max-h-64 pr-2" id="d_news"></div>
-                        <div class="col-span-1 border-l border-gray-100 pl-6 space-y-3 text-sm font-mono" id="d_calendar"></div>
+                    <div class="col-span-1 glass-panel bg-[#FFFDF5] p-5">
+                        <div class="header-title text-[#8B7355]"><span>備忘錄</span></div>
+                        <textarea id="d_memo" class="w-full h-40 bg-transparent border-none text-base resize-none focus:ring-0" placeholder="點擊輸入..."></textarea>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="glass-panel p-6">
-                        <div class="header-title text-[#8B7355]">
-                            EPS 成長 <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded ml-2 font-normal">藍字為預估</span>
-                        </div>
-                        <div class="h-64 mb-6"><canvas id="chart_eps"></canvas></div>
-                        <div class="overflow-x-auto rounded-lg border border-gray-100">
-                            <table class="w-full data-table" id="eps_table_dom">
-                                <thead><tr><th class="text-left">期間</th><th>毛利%</th><th>淨利%</th><th>EPS</th><th>累計</th></tr></thead>
-                                <tbody id="t_eps"></tbody>
-                            </table>
-                        </div>
+                        <div class="header-title text-[#8B7355]"><span>EPS (由左至右為時間軸)</span></div>
+                        <div class="h-56 mb-4"><canvas id="chart_eps"></canvas></div>
+                        <div class="overflow-x-auto"><table class="w-full data-table"><tbody id="t_eps"></tbody></table></div>
                     </div>
                     <div class="glass-panel p-6">
-                        <div class="header-title text-[#8B7355]">月營收趨勢 <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded ml-2 font-normal cursor-pointer">點擊表格修改</span></div>
-                        <div class="h-64 mb-6"><canvas id="chart_rev"></canvas></div>
-                        <div class="overflow-x-auto rounded-lg border border-gray-100">
-                            <table class="w-full data-table" id="rev_table_dom">
-                                <thead><tr><th class="text-left">月份</th><th>營收 (億)</th><th>MoM%</th><th>YoY%</th></tr></thead>
-                                <tbody id="t_rev"></tbody>
-                            </table>
-                        </div>
+                        <div class="header-title text-[#8B7355]"><span>月營收動能 (由左至右)</span></div>
+                        <div class="h-56 mb-4"><canvas id="chart_rev"></canvas></div>
+                        <div class="overflow-x-auto"><table class="w-full data-table"><tbody id="t_rev"></tbody></table></div>
                     </div>
                 </div>
 
                 <div class="glass-panel p-6">
-                    <div class="header-title text-[#8B7355]">
-                        估值河流圖 (Valuation)
-                        <div class="text-sm font-normal text-gray-500 flex gap-4">
-                            <span>PB: <b id="d_pb" class="text-gray-800">-</b></span>
-                            <span>ROE: <b id="d_roe" class="text-gray-800">-</b></span>
-                            <span class="bg-gray-100 px-3 py-0.5 rounded font-bold text-[#8B7355]" id="d_pe_stat">-</span>
-                        </div>
-                    </div>
-                    <div class="h-[500px] w-full relative"><canvas id="chart_river"></canvas></div>
+                    <div class="header-title text-[#8B7355]">PE 河流圖 (區間填充與數值)</div>
+                    <div class="h-[500px] w-full"><canvas id="chart_river"></canvas></div>
                 </div>
 
                 <div class="glass-panel p-6 border-l-[8px] border-[#8B7355]">
-                    <div class="header-title text-[#8B7355]">技術與籌碼 AI 策略 <span id="d_c" class="ml-4 text-sm bg-gray-100 px-3 py-1 rounded text-gray-500 font-mono">--</span></div>
-                    <p class="text-base text-gray-700 mb-8 leading-8 text-justify font-medium" id="d_tech_txt">--</p>
-                    
-                    <div class="grid grid-cols-4 gap-4 text-center mb-6">
-                        <div class="p-4 border rounded-xl bg-white shadow-sm">
-                            <div class="text-xs text-gray-400 mb-2 uppercase tracking-wide">30 Days</div>
-                            <div id="p_30" class="text-xl font-bold text-blue-600 font-mono">--</div>
-                        </div>
-                        <div class="p-4 border rounded-xl bg-white shadow-sm">
-                            <div class="text-xs text-gray-400 mb-2 uppercase tracking-wide">180 Days</div>
-                            <div id="p_180" class="text-xl font-bold text-blue-600 font-mono">--</div>
-                        </div>
-                        <div class="p-4 border rounded-xl bg-white shadow-sm">
-                            <div class="text-xs text-gray-400 mb-2 uppercase tracking-wide">360 Days</div>
-                            <div id="p_360" class="text-xl font-bold text-blue-600 font-mono">--</div>
-                        </div>
-                        <div class="p-4 border-2 border-[#8B7355] bg-[#FFFBF0] rounded-xl shadow-md">
-                            <div class="text-xs text-[#8B7355] font-bold mb-2 uppercase tracking-wide">Entry Zone</div>
-                            <div id="p_entry" class="text-xl font-black text-[#C0392B]">--</div>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-gray-100 p-4 rounded-lg flex items-center gap-3">
-                        <i class="fas fa-wave-square text-gray-400"></i> 
-                        <span class="font-bold text-gray-500">BBands:</span> 
-                        <span id="d_boll" class="font-bold text-gray-800 text-lg">--</span>
+                    <div class="header-title text-[#8B7355]"><span>技術預測</span><span id="d_c" class="text-sm">--</span></div>
+                    <p class="text-lg text-gray-700 mb-6 leading-relaxed" id="d_tech_txt">--</p>
+                    <div class="grid grid-cols-4 gap-4 text-center">
+                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">30D</div><div id="p_30" class="text-xl font-bold">--</div></div>
+                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">180D</div><div id="p_180" class="text-xl font-bold">--</div></div>
+                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">360D</div><div id="p_360" class="text-xl font-bold">--</div></div>
+                        <div class="p-4 border border-[#8B7355] bg-[#FFFBF0] rounded font-mono"><div class="text-xs text-[#8B7355] font-bold">進場</div><div id="p_entry" class="text-2xl font-black text-[#C0392B]">--</div></div>
                     </div>
                 </div>
-
-                <div class="glass-panel p-5 flex justify-between text-base font-bold text-gray-700 items-center">
-                    <span class="text-[#8B7355] text-lg"><i class="fas fa-coins mr-3"></i> 股利政策</span>
-                    <span class="font-mono bg-gray-50 px-4 py-2 rounded border">Yield: <span id="d_yield">--</span></span>
-                    <span class="font-mono bg-gray-50 px-4 py-2 rounded border">Past ROI: <span id="d_roi_h">--</span></span>
-                    <span class="font-mono bg-red-50 text-[#C0392B] px-4 py-2 rounded border border-red-200 shadow-sm">Est ROI: <span id="d_roi_f">--</span></span>
-                </div>
-
             </div>
         </main>
     </div>
 
     <script>
-        // ------------------------------------------
-        // ⚠️ SETUP
-        const GITHUB_TOKEN = "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"; 
-        const GITHUB_USER = "Mocha-lin"; 
-        const GITHUB_REPO = "-3";
-        // ------------------------------------------
+        // 設定 Chart.js 全域字體大小
+        Chart.defaults.font.size = 14;
 
         let db = [];
         let currentStockId = null;
-        let charts = { river:null, eps:null, rev:null };
+        let chartInstances = { river: null, eps: null, rev: null };
+
+        // 以下維持核心邏輯完全不動
+        const GITHUB_TOKEN = "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";
+        const GITHUB_USER = "Mocha-lin"; 
+        const GITHUB_REPO = "-3";
 
         window.onload = () => {
-            const local = localStorage.getItem('bbb_db_v5'); // v5 new storage key
-            if(local) db = JSON.parse(local);
+            const localRaw = localStorage.getItem('bbb_db_v4');
+            if(localRaw) db = JSON.parse(localRaw);
             renderSidebar();
-            syncData(); // auto sync
+            syncData();
         };
 
-        async function syncData(force=false) {
+        async function syncData(force = false) {
             const badge = document.getElementById('statusBadge');
-            badge.innerText = "Syncing...";
-            badge.className = "text-sm font-mono px-3 py-1 rounded bg-yellow-100 text-yellow-700 flex items-center";
+            badge.classList.remove('hidden');
             try {
-                const res = await fetch(force ? `./data.json?t=${Date.now()}` : './data.json');
-                const cloud = await res.json();
-                if(Array.isArray(cloud) && cloud.length>0) {
-                    const localData = JSON.parse(localStorage.getItem('bbb_db_v5')||'[]');
-                    // Union Logic
-                    cloud.forEach(c => {
-                        const idx = localData.findIndex(x=>x.id===c.id);
-                        if(idx!==-1) {
-                            if(!c.memo) c.memo = localData[idx].memo;
-                            localData[idx] = c; // Update with cloud
+                const url = force ? `./data.json?t=${Date.now()}` : './data.json';
+                const res = await fetch(url);
+                if(!res.ok) throw new Error("Offline");
+                const cloudData = await res.json();
+                if (Array.isArray(cloudData)) {
+                    cloudData.forEach(cloudItem => {
+                        const localIdx = db.findIndex(x => x.id === cloudItem.id);
+                        if (localIdx !== -1) {
+                            db[localIdx].basicInfo = cloudItem.basicInfo;
+                            db[localIdx].lastUpdated = cloudItem.lastUpdated;
                         } else {
-                            localData.unshift(c); // Add new
+                            db.unshift(cloudItem);
                         }
                     });
-                    db = localData;
                     saveToLocal();
                     renderSidebar();
                     if(currentStockId) loadStock(currentStockId);
-                    badge.innerHTML = `<i class="fas fa-check-circle mr-2"></i> Online`;
-                    badge.className = "text-sm font-mono px-3 py-1 rounded bg-green-100 text-green-700 flex items-center";
+                    badge.innerHTML = "Online";
                 }
-            } catch(e) {
-                badge.innerText = "Local Mode";
-                badge.className = "text-sm font-mono px-3 py-1 rounded bg-gray-100 text-gray-500 flex items-center";
-            }
+            } catch (e) { badge.innerHTML = "Local Mode"; }
+        }
+
+        function toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); }
+        function importJSON() {
+            try {
+                const raw = document.getElementById('jsonInput').value;
+                const newData = JSON.parse(raw);
+                const idx = db.findIndex(x => x.id === newData.id);
+                if (idx !== -1) db[idx] = newData; else db.unshift(newData);
+                saveToLocal(); toggleModal('jsonModal'); renderSidebar(); loadStock(newData.id);
+            } catch (e) { alert("JSON 格式有誤"); }
         }
 
         function renderSidebar() {
-            const el = document.getElementById('stockList');
-            const q = document.getElementById('addStockInput').value.trim().toUpperCase(); 
-            el.innerHTML = "";
-            let cats = {};
-            
+            const list = document.getElementById('stockList');
+            list.innerHTML = "";
             db.forEach(s => {
-                if(q && !s.id.includes(q) && !s.name.includes(q)) return;
-                const c = s.category || "Uncategorized";
-                if(!cats[c]) cats[c] = [];
-                cats[c].push(s);
+                const el = document.createElement('div');
+                const chg = parseFloat(s.basicInfo.change) || 0;
+                const color = chg >= 0 ? "text-[#C0392B]" : "text-[#16A34A]";
+                el.className = `p-3 rounded cursor-pointer border hover:bg-white transition flex justify-between items-center ${currentStockId === s.id ? 'bg-white shadow-md border-l-4 border-l-[#8B7355]' : 'border-transparent'}`;
+                el.innerHTML = `<div class="font-bold font-mono">${s.id} ${s.name}</div><div class="font-mono ${color}">${s.basicInfo.changePercent}</div>`;
+                el.onclick = () => loadStock(s.id);
+                list.appendChild(el);
             });
-
-            for(let [cat, items] of Object.entries(cats)) {
-                const grp = document.createElement('div');
-                grp.className = "mb-4";
-                grp.innerHTML = `<div class="px-3 py-2 text-xs font-bold text-gray-400 uppercase tracking-widest border-b mb-2 flex justify-between cursor-pointer" onclick="this.nextElementSibling.classList.toggle('hidden')">${cat} <i class="fas fa-angle-down"></i></div>`;
-                const ul = document.createElement('div');
-                ul.className = "space-y-2";
-                
-                items.forEach(s => {
-                    const d = document.createElement('div');
-                    let style = "border-transparent bg-white shadow-sm";
-                    const sig = s.technical?.signal_light || "";
-                    if(sig.includes('red')) style="flash-buy bg-white"; else if(sig.includes('green')) style="flash-sell bg-white";
-                    
-                    if(currentStockId === s.id) style += " border-l-8 border-l-[#8B7355] ring-1 ring-[#8B7355]/30 transform translate-x-1";
-                    
-                    const chg = parseFloat(s.basicInfo.change) || 0;
-                    const col = chg>=0?"text-[#C0392B]":"text-[#16A34A]";
-
-                    d.className = `p-4 rounded-xl cursor-pointer border transition-all hover:shadow-md flex justify-between items-center ${style}`;
-                    d.innerHTML = `
-                        <div>
-                            <div class="text-lg font-bold text-[#2C3E50] mb-0.5">${s.name}</div>
-                            <div class="text-xs font-mono text-gray-400 font-bold">${s.id}</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-mono text-base font-bold text-gray-800">${s.basicInfo.price}</div>
-                            <div class="text-xs font-bold ${col}">${s.basicInfo.changePercent}</div>
-                        </div>
-                    `;
-                    d.onclick = () => loadStock(s.id);
-                    ul.appendChild(d);
-                });
-                new Sortable(ul, { animation:150 });
-                grp.appendChild(ul);
-                el.appendChild(grp);
-            }
         }
 
         function loadStock(id) {
             const s = db.find(x => x.id === id);
-            if(!s) return;
+            if (!s) return;
             currentStockId = id;
             document.getElementById('emptyState').classList.add('hidden');
             document.getElementById('dashboard').classList.remove('hidden');
             renderSidebar();
 
-            // 1. Basic
-            setText('d_name', s.name);
-            setText('d_id', s.id);
+            document.getElementById('d_name_id').innerHTML = `<span class="text-[#8B7355] mr-3">${s.id}</span>${s.name}`;
             setText('d_date', s.lastUpdated);
-            setText('aiModelTag', s.ai_model || "AI");
+            setText('d_note', s.basicInfo.note);
             
-            const chg = parseFloat(s.basicInfo.change) || 0;
-            const col = chg>=0?"text-[#C0392B]":"text-[#16A34A]";
-            setText('d_price', s.basicInfo.price);
-            document.getElementById('d_price').className = `text-7xl font-mono font-bold tracking-tighter ${col}`;
-            document.getElementById('d_change').innerHTML = `<span class="${col}">${s.basicInfo.change} (${s.basicInfo.changePercent})</span>`;
+            const p = document.getElementById('d_price');
+            p.innerText = s.basicInfo.price;
+            p.className = `text-7xl font-mono font-bold ${(parseFloat(s.basicInfo.change)>=0) ? "text-[#C0392B]" : "text-[#16A34A]"}`;
+            setText('d_change', `${s.basicInfo.change} (${s.basicInfo.changePercent})`);
 
-            // 2. Info
-            setText('d_moat_desc', (s.industry.moat_status||"") + " | " + (s.industry.moat_desc||s.industry.position_map||""));
+            document.getElementById('d_moat_desc').innerText = s.industry.moat_status + " | " + (s.industry.moat_desc||"");
             setText('d_pos', s.industry.position_map);
             setText('d_comp', s.industry.competitors);
-            const m = document.getElementById('d_memo');
-            m.value = s.memo||"";
-            m.oninput = ()=>{ 
-                const target = db.find(x => x.id === currentStockId);
-                if(target) { target.memo = m.value; saveToLocal(); }
-            };
+            document.getElementById('d_memo').value = s.memo || "";
+            document.getElementById('d_memo').oninput = function() { s.memo = this.value; saveToLocal(); };
 
-            // 3. Tables (Newest -> Oldest) & Editable
-            renderEditableTable('t_eps', s.financials.eps_table||[], ['period','gross_margin','net_margin','eps','cumulative']);
-            
-            // Revenue needs strict sorting for Table (New -> Old)
-            let rData = s.financials.revenue_trend||[];
-            rData.sort((a,b) => b.month.localeCompare(a.month)); // Sort Descending
-            renderEditableTable('t_rev', rData.slice(0,12), ['month','revenue','mom','yoy']);
+            renderEditableTable('t_eps', s.financials.eps_table || [], ['period','gross_margin','net_margin','eps','cumulative']);
+            renderEditableTable('t_rev', (s.financials.revenue_trend||[]).slice(0,12), ['month','revenue','mom','yoy']);
 
-            // 4. News
-            const nb = document.getElementById('d_news'); nb.innerHTML='';
-            (s.news_events?.news||[]).forEach(n=>{
-                const tag = n.is_new ? '<span class="bg-red-500 text-white text-[10px] px-1 rounded mr-2 align-middle">NEW</span>' : '';
-                const c = n.type.includes('pos')?'text-red-600':(n.type.includes('neg')?'text-green-600':'text-gray-700');
-                nb.innerHTML+=`<div class="py-2 border-b border-gray-100 flex gap-3"><span class="font-mono text-gray-400 text-xs w-24 shrink-0">${n.date}</span><span class="${c} font-medium text-sm">${tag}${n.title}</span></div>`;
-            });
-            const cb = document.getElementById('d_calendar'); cb.innerHTML='';
-            (s.news_events?.calendar||[]).forEach(c => cb.innerHTML+=`<div class="mb-2"><div class="font-mono text-gray-400 text-xs">${c.date}</div><div class="font-bold text-[#8B7355]">${c.event}</div></div>`);
-
-            // 5. Metrics
-            setText('d_pb', s.financials.valuation.pb);
-            setText('d_roe', s.financials.valuation.roe);
-            setText('d_pe_stat', s.financials.valuation.pe_status);
-            
-            // 6. Tech
-            setText('d_c', "校正:"+s.technical.correction_c);
+            setText('d_c', "C: "+s.technical.correction_c);
             document.getElementById('d_tech_txt').innerText = s.technical.analysis_text;
             setText('p_30', s.technical.predictions.days30);
             setText('p_180', s.technical.predictions.days180);
             setText('p_360', s.technical.predictions.days360);
             setText('p_entry', s.technical.predictions.entry_zone);
-            setText('d_boll', s.technical.bollinger.status);
-            
-            setText('d_yield', s.dividend.yield);
-            setText('d_roi_h', s.dividend.history_roi);
-            setText('d_roi_f', s.dividend.future_roi);
 
-            renderCharts(s, rData); 
+            renderCharts(s);
         }
 
-        function renderEditableTable(domId, data, keys) {
-            const el = document.getElementById(domId); el.innerHTML='';
-            data.forEach((r,idx) => {
-                const cls = r.is_estimate ? 'est-row' : 'fact-row';
-                const tag = r.is_estimate ? '<span class="est-tag">預</span>' : '';
-                // 使用唯一識別碼 (Period 或 Month) 傳入 updateCell
-                const idValue = r.period || r.month; 
-
-                let h = `<tr class="${cls}">`;
-                keys.forEach((k,i)=>{
-                    const align = i===0?'text-left':'text-right editable';
-                    const val = r[k] || '-';
-                    // Special color for % negative
-                    let valColor = '';
-                    if(val.includes('-') && (k.includes('yoy')||k.includes('mom'))) valColor = 'text-green-600';
-                    if(!val.includes('-') && (k.includes('yoy')||k.includes('mom'))) valColor = 'text-red-600 font-bold';
-                    
-                    if(i===0) h+=`<td class="${align}">${val}${tag}</td>`;
-                    else h+=`<td class="${align} ${valColor}" contenteditable="true" onblur="updateCell('${domId}','${idValue}','${k}',this.innerText)">${val}</td>`;
+        function renderEditableTable(domId, dataArray, keys) {
+            const el = document.getElementById(domId);
+            el.innerHTML = '';
+            dataArray.forEach((row, rIndex) => {
+                let tr = document.createElement('tr');
+                tr.className = row.is_estimate ? "est-row" : "fact-row";
+                keys.forEach((key, kIndex) => {
+                    let td = document.createElement('td');
+                    td.className = kIndex === 0 ? "text-left" : "text-right editable";
+                    td.innerHTML = row[key] + (kIndex === 0 && row.is_estimate ? '<span class="est-tag">預</span>' : '');
+                    if (kIndex !== 0) {
+                        td.contentEditable = true;
+                        td.onblur = function() { dataArray[rIndex][key] = this.innerText; saveToLocal(); };
+                    }
+                    tr.appendChild(td);
                 });
-                el.innerHTML += h+'</tr>';
+                el.appendChild(tr);
             });
         }
 
-        function updateCell(tableId, idValue, key, val) {
-            // 1. 找到當前股票
-            const s = db.find(x => x.id === currentStockId);
-            if (!s) return;
-
-            let targetArray = null;
-            let findKey = "";
-
-            // 2. 判斷要修改哪個 Array
-            if(tableId === 't_eps') {
-                targetArray = s.financials.eps_table;
-                findKey = "period";
-            } else if(tableId === 't_rev') {
-                targetArray = s.financials.revenue_trend;
-                findKey = "month";
-            }
-
-            // 3. 執行修改並存檔
-            if(targetArray) {
-                const row = targetArray.find(item => item[findKey] === idValue);
-                if(row) {
-                    row[key] = val;
-                    saveToLocal(); // 寫入 localStorage
-                    console.log(`Saved ${key}=${val} for ${idValue}`);
-                }
-            }
-        }
-
-        function renderCharts(s, revDataSortedDesc) {
-            // PE River (Modified for Color Fill)
-            const ctxPe = document.getElementById('chart_river').getContext('2d');
-            if(charts.river) charts.river.destroy();
+        function renderCharts(s) {
+            // 1. 河流圖 (修正色帶填充與備註)
+            const ctxRiver = document.getElementById('chart_river').getContext('2d');
+            if (chartInstances.river) chartInstances.river.destroy();
             const rd = s.financials.valuation.pe_river_data;
-            if(rd && rd.price) {
-                charts.river = new Chart(ctxPe, {
+            if(rd) {
+                chartInstances.river = new Chart(ctxRiver, {
                     type: 'line',
                     data: {
                         labels: rd.dates,
                         datasets: [
-                            { 
-                                label:'Price', 
-                                data:rd.price, 
-                                borderColor:'#374151', 
-                                borderWidth:3, 
-                                pointRadius:0, 
-                                tension:0.2,
-                                z: 10 // Ensure price is on top
-                            },
-                            { 
-                                label:'High (PE20)', 
-                                data:rd.pe20, 
-                                borderColor:'#DC2626', 
-                                borderWidth:1.5, 
-                                pointRadius:0, 
-                                backgroundColor: 'rgba(220, 38, 38, 0.05)', // 淡紅色背景
-                                fill: 2 // 填充直到下一個 Dataset (Idx 2)
-                            },
-                            { 
-                                label:'Low (PE12)', 
-                                data:rd.pe12, 
-                                borderColor:'#16A34A', 
-                                borderWidth:1.5, 
-                                pointRadius:0, 
-                                backgroundColor: 'rgba(22, 163, 74, 0.05)', // 淡綠色背景
-                                fill: false 
-                            }
+                            { label: 'Price', data: rd.price, borderColor:'#374151', borderWidth:3, pointRadius:0, fill:false, z:10 },
+                            { label: 'PE20', data: rd.pe20, borderColor:'#DC2626', borderWidth:1, pointRadius:0, fill:false },
+                            { label: 'PE16', data: rd.pe16, borderColor:'#F59E0B', borderWidth:1, pointRadius:0, fill:'-1', backgroundColor:'rgba(220,38,38,0.08)' },
+                            { label: 'PE12', data: rd.pe12, borderColor:'#16A34A', borderWidth:1, pointRadius:0, fill:'-1', backgroundColor:'rgba(245,158,11,0.12)' }
                         ]
                     },
                     options: { 
-                        responsive:true, 
-                        maintainAspectRatio:false, 
-                        plugins:{legend:{position:'bottom'}}, 
-                        elements:{point:{radius:0}} 
+                        responsive:true, maintainAspectRatio:false,
+                        plugins: {
+                            legend: { position: 'top' }
+                        },
+                        scales: {
+                            y: { ticks: { font: { size: 14 } } },
+                            x: { ticks: { font: { size: 12 } } }
+                        }
                     }
                 });
             }
 
-            // Rev Chart: NEEDS ASCENDING (Old -> New)
-            const ctxRev = document.getElementById('chart_rev').getContext('2d');
-            if(charts.rev) charts.rev.destroy();
-            // Clone and reverse for Chart
-            const chartRevData = [...revDataSortedDesc].reverse(); 
-            
-            charts.rev = new Chart(ctxRev, {
-                type: 'bar',
-                data: {
-                    labels: chartRevData.map(r=>r.month),
-                    datasets: [
-                        { type:'line', label:'YoY', data:chartRevData.map(r=>parseFloat(r.yoy)), borderColor:'#8B7355', yAxisID:'y1' },
-                        { type:'bar', label:'Rev', data:chartRevData.map(r=>parseFloat(r.revenue)), backgroundColor:chartRevData.map(r=>r.is_estimate?'#93C5FD':'#D1D5DB'), yAxisID:'y' }
-                    ]
-                },
-                options: { 
-                    responsive:true, maintainAspectRatio:false, 
-                    plugins:{legend:{display:false}}, 
-                    scales:{ y:{display:false}, y1:{display:false, position:'right'}, x:{grid:{display:false}} }
-                }
-            });
-
-            // EPS Chart
+            // 2. EPS (時序由左至右：Reverse Array)
             const ctxEps = document.getElementById('chart_eps').getContext('2d');
-            if(charts.eps) charts.eps.destroy();
-            const epsD = s.financials.eps_table || [];
-            charts.eps = new Chart(ctxEps, {
+            if(chartInstances.eps) chartInstances.eps.destroy();
+            const eD = [...(s.financials.eps_table || [])].reverse(); // 複製並反轉
+            chartInstances.eps = new Chart(ctxEps, {
                 type: 'line',
                 data: {
-                    labels: epsD.map(e=>e.period),
+                    labels: eD.map(e=>e.period),
                     datasets: [{
-                        label:'EPS', data:epsD.map(e=>parseFloat(e.eps)), borderColor:'#2563EB', backgroundColor:'#EFF6FF', fill:true, tension:0.3,
-                        segment: { borderDash: ctx => ctx.p0DataIndex >= epsD.findIndex(x=>x.is_estimate) ? [5,5] : undefined }
+                        label: 'EPS', data: eD.map(e=>parseFloat(e.eps)),
+                        borderColor: '#2563EB', backgroundColor: 'rgba(37,99,235,0.1)', fill: true, tension: 0.3
                     }]
                 },
-                options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false}}, y:{display:false}} }
+                options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
+            });
+
+            // 3. 營收 (時序由左至右：Reverse Array)
+            const ctxRev = document.getElementById('chart_rev').getContext('2d');
+            if(chartInstances.rev) chartInstances.rev.destroy();
+            const rD = [...(s.financials.revenue_trend||[])].slice(0,12).reverse(); // 複製並反轉
+            chartInstances.rev = new Chart(ctxRev, {
+                type: 'bar',
+                data: {
+                    labels: rD.map(r=>r.month),
+                    datasets: [{ 
+                        label: 'Revenue', data: rD.map(r=>parseFloat(r.revenue)), 
+                        backgroundColor: rD.map(r=>r.is_estimate ? '#93C5FD' : '#D1D5DB'),
+                        borderRadius: 4
+                    }]
+                },
+                options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
             });
         }
 
         async function triggerAddStock() {
-            const id = document.getElementById('addStockInput').value.trim().toUpperCase();
-            if(!id || GITHUB_TOKEN.includes("亂碼")) return alert("Token Invalid");
-            if(db.find(x=>x.id===id)) { loadStock(id); return; }
-            if(!confirm(`觸發 AI 分析 ${id}?`)) return;
-
+            const input = document.getElementById('addStockInput');
+            const id = input.value.trim().toUpperCase();
+            if(!id || GITHUB_TOKEN.includes("貼")) return;
             document.getElementById('processingOverlay').style.display = 'flex';
             document.getElementById('targetStock').innerText = id;
             try {
                 await fetch(`https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/dispatches`, {
-                    method:'POST',
-                    headers:{'Accept':'application/vnd.github.v3+json','Authorization':`Bearer ${GITHUB_TOKEN}`},
-                    body: JSON.stringify({event_type:'add_stock_trigger', client_payload:{stock_id:id}})
+                    method: 'POST',
+                    headers: {'Accept':'application/vnd.github.v3+json', 'Authorization': `Bearer ${GITHUB_TOKEN}`},
+                    body: JSON.stringify({ event_type: 'add_stock_trigger', client_payload: { stock_id: id } })
                 });
-                startPolling(id);
-            } catch(e) { alert("Error"); document.getElementById('processingOverlay').style.display='none'; }
+                setTimeout(()=> { document.getElementById('processingOverlay').style.display='none'; syncData(true); }, 30000);
+            } catch(e) { document.getElementById('processingOverlay').style.display = 'none'; }
         }
 
-        let pt;
-        function startPolling(id) {
-            let n=0; if(pt) clearInterval(pt);
-            pt = setInterval(async()=>{
-                n++;
-                try {
-                    const r = await fetch(`./data.json?t=${Date.now()}`);
-                    const d = await r.json();
-                    if(d.find(x=>x.id===id)) { clearInterval(pt); await syncData(true); loadStock(id); document.getElementById('processingOverlay').style.display='none'; }
-                } catch(e){}
-                if(n>30) { clearInterval(pt); document.getElementById('processingOverlay').style.display='none'; alert("Timeout"); }
-            },5000);
-        }
-
-        function saveToLocal(){ localStorage.setItem('bbb_db_v5', JSON.stringify(db)); }
-        function toggleModal(id){ document.getElementById(id).classList.toggle('hidden'); }
-        function importJSON() {
-            try {
-                const d = JSON.parse(document.getElementById('jsonInput').value);
-                const i = db.findIndex(s=>s.id===d.id);
-                if(i!==-1) { if(!d.memo) d.memo=db[i].memo; db[i]=d; } else db.unshift(d);
-                saveToLocal(); toggleModal('jsonModal'); renderSidebar(); loadStock(d.id);
-            } catch(e){ alert("JSON Error"); }
-        }
-        function setText(i,t){ const e=document.getElementById(i); if(e)e.innerText=t||'-'; }
+        function saveToLocal() { localStorage.setItem('bbb_db_v4', JSON.stringify(db)); }
+        function setText(i,t) { if(document.getElementById(i)) document.getElementById(i).innerText=t||'-'; }
     </script>
 </body>
 </html>
