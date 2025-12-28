@@ -11,13 +11,13 @@
     
     <style>
         :root { --bg: #F9F7F2; --accent: #8B7355; --text: #374151; --border: #E5E7EB; }
-        /* 1. 全域字體加大 */
+        /* 1. 字體全域放大 */
         body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; overflow: hidden; font-size: 16px; }
         
         .glass-panel { background: white; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-radius: 8px; }
-        .header-title { font-size: 1.1rem; font-weight: 800; color: #4B5563; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.05em; }
+        .header-title { font-size: 1.15rem; font-weight: 800; color: #4B5563; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; letter-spacing: 0.05em; }
         
-        /* 表格字體加大 */
+        /* 表格樣式優化與放大 */
         .data-table th { @apply bg-gray-50 text-sm text-gray-500 uppercase font-bold p-3 text-right sticky top-0; }
         .data-table td { @apply p-3 text-base border-b border-gray-100 text-right font-mono outline-none transition duration-200; }
         .editable:hover { background-color: #FFFBF0; cursor: text; box-shadow: inset 0 0 0 1px #8B7355; }
@@ -25,10 +25,8 @@
 
         .fact-row td { color: #111827; font-weight: 600; }
         .est-row td { color: #2563EB; font-weight: 700; font-style: italic; background-color: #F8FAFC; }
-        .est-tag { font-size: 0.75rem; background: #2563EB; color: white; padding: 1px 4px; border-radius: 2px; margin-left: 4px; vertical-align: middle; }
+        .est-tag { font-size: 0.7rem; background: #2563EB; color: white; padding: 2px 4px; border-radius: 2px; margin-left: 4px; vertical-align: middle; }
 
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 99; display: none; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(2px); }
     </style>
 </head>
@@ -38,37 +36,32 @@
         <div class="text-[#8B7355] text-5xl mb-4"><i class="fas fa-satellite-dish fa-spin"></i></div>
         <h2 class="text-xl font-bold">呼叫 bbb 戰情室...</h2>
         <p class="text-gray-500 mt-2">AI 正在分析 <span id="targetStock" class="font-bold text-[#8B7355]"></span></p>
-        <p class="text-xs text-gray-400 mt-4 animate-pulse">預計耗時 1-2 分鐘，請勿關閉視窗</p>
     </div>
 
     <div id="jsonModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center">
-        <div class="bg-white w-4/5 h-4/5 rounded-xl shadow-2xl flex flex-col p-6 animate-fade-in-up">
+        <div class="bg-white w-4/5 h-4/5 rounded-xl shadow-2xl flex flex-col p-6">
             <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-xl text-[#8B7355]"><i class="fas fa-file-import mr-2"></i> 手動匯入 bbb 報告</h3>
+                <h3 class="font-bold text-xl text-[#8B7355]">手動匯入 bbb 報告</h3>
                 <button onclick="toggleModal('jsonModal')" class="text-3xl text-gray-400 hover:text-black">&times;</button>
             </div>
-            <textarea id="jsonInput" class="flex-1 border-2 border-gray-200 p-4 font-mono text-sm rounded-lg focus:border-[#8B7355] outline-none transition" placeholder='請貼上 JSON...'></textarea>
+            <textarea id="jsonInput" class="flex-1 border-2 border-gray-200 p-4 font-mono text-sm rounded-lg outline-none" placeholder='請貼上 JSON...'></textarea>
             <div class="mt-4 text-right">
-                <button onclick="importJSON()" class="px-6 py-2 bg-[#8B7355] text-white rounded-lg font-bold shadow hover:bg-[#6e5a40] transition">確認匯入</button>
+                <button onclick="importJSON()" class="px-6 py-2 bg-[#8B7355] text-white rounded-lg font-bold">確認匯入</button>
             </div>
         </div>
     </div>
 
-    <header class="bg-[#ECE8DE] h-14 flex items-center px-6 border-b border-[#DCD6C9] justify-between shrink-0 shadow-sm z-20">
+    <header class="bg-[#ECE8DE] h-14 flex items-center px-6 border-b border-[#DCD6C9] justify-between shrink-0 z-20">
         <div class="font-black text-xl tracking-widest text-[#5A4A42]">bbb ANALYTICS <span class="text-xs font-normal text-gray-500 ml-1">Ultimate</span></div>
         <div class="flex items-center gap-3">
             <div id="statusBadge" class="text-xs font-mono px-2 py-1 rounded bg-gray-200 text-gray-500 hidden md:flex">Offline</div>
-            <button onclick="toggleModal('jsonModal')" class="bg-[#8B7355] text-white px-3 py-1.5 rounded-full text-xs font-bold shadow flex items-center gap-2 hover:scale-105 transition">
-                <i class="fas fa-cloud-upload-alt"></i> 手動匯入
-            </button>
-            <button onclick="syncData(true)" class="bg-white border border-[#D1C7B7] text-[#8B7355] px-3 py-1.5 rounded text-xs font-bold hover:bg-gray-50 shadow-sm transition">
-                <i class="fas fa-sync-alt mr-1"></i> 刷新雲端
-            </button>
+            <button onclick="toggleModal('jsonModal')" class="bg-[#8B7355] text-white px-3 py-1.5 rounded-full text-xs font-bold shadow hover:scale-105 transition">手動匯入</button>
+            <button onclick="syncData(true)" class="bg-white border border-[#D1C7B7] text-[#8B7355] px-3 py-1.5 rounded text-xs font-bold hover:bg-gray-50 transition">刷新雲端</button>
         </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden">
-        <aside class="w-[20%] min-w-[280px] bg-[#F5F2EB] border-r border-[#E5E0D8] flex flex-col z-10">
+        <aside class="w-[22%] min-w-[280px] bg-[#F5F2EB] border-r border-[#E5E0D8] flex flex-col z-10 shadow-sm">
             <div class="p-3 border-b border-[#E5E0D8]">
                 <div class="relative">
                     <input type="text" id="addStockInput" placeholder="代號 按 Enter" class="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-[#8B7355] font-mono">
@@ -79,13 +72,12 @@
         </aside>
 
         <main class="flex-1 overflow-y-auto bg-[#FDFBF7] p-8" id="mainBoard">
-            <div id="emptyState" class="h-full flex flex-col items-center justify-center text-gray-300">
+            <div id="emptyState" class="h-full flex flex-col items-center justify-center text-gray-300 select-none">
                 <i class="fas fa-folder-open text-8xl mb-6 opacity-30"></i>
-                <p class="text-xl">請選擇股票或匯入資料</p>
+                <p class="text-xl font-light">請從左側選擇股票，或匯入分析資料</p>
             </div>
 
-            <div id="dashboard" class="hidden max-w-[1400px] mx-auto space-y-8 pb-24">
-                
+            <div id="dashboard" class="hidden max-w-[1500px] mx-auto space-y-8 pb-24">
                 <div class="flex flex-col md:flex-row justify-between items-end border-b-4 border-[#8B7355] pb-4">
                     <div>
                         <h1 class="text-6xl font-extrabold text-[#2C3E50] tracking-tighter mb-2" id="d_name_id">--</h1>
@@ -104,44 +96,47 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="col-span-2 glass-panel p-6">
                         <div class="header-title text-[#8B7355]"><span>產業護城河 (AI)</span></div>
-                        <div class="text-lg text-gray-700 leading-8 mb-4" id="d_moat_desc">--</div>
+                        <div class="text-lg text-gray-700 leading-8 mb-4 text-justify" id="d_moat_desc">--</div>
                         <div class="flex gap-4 text-sm font-mono">
-                            <div class="bg-gray-50 p-3 rounded flex-1"><strong>POSITION:</strong> <span id="d_pos">--</span></div>
-                            <div class="bg-gray-50 p-3 rounded flex-1"><strong>RIVALS:</strong> <span id="d_comp">--</span></div>
+                            <div class="bg-gray-50 p-3 rounded flex-1 border border-gray-100"><strong class="text-gray-400 block mb-1">POSITION</strong> <span id="d_pos">--</span></div>
+                            <div class="bg-gray-50 p-3 rounded flex-1 border border-gray-100"><strong class="text-gray-400 block mb-1">RIVALS</strong> <span id="d_comp">--</span></div>
                         </div>
                     </div>
-                    <div class="col-span-1 glass-panel bg-[#FFFDF5] p-5">
-                        <div class="header-title text-[#8B7355]"><span>備忘錄</span></div>
-                        <textarea id="d_memo" class="w-full h-40 bg-transparent border-none text-base resize-none focus:ring-0" placeholder="點擊輸入..."></textarea>
+                    <div class="col-span-1 glass-panel bg-[#FFFDF5] p-5 flex flex-col">
+                        <div class="header-title text-[#8B7355]"><span><i class="fas fa-pen-alt mr-2"></i>備忘錄</span></div>
+                        <textarea id="d_memo" class="flex-1 w-full bg-transparent border-none text-base resize-none focus:ring-0 leading-relaxed text-gray-600" placeholder="點擊輸入心得..."></textarea>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="glass-panel p-6">
-                        <div class="header-title text-[#8B7355]"><span>EPS (由左至右為時間軸)</span></div>
-                        <div class="h-56 mb-4"><canvas id="chart_eps"></canvas></div>
-                        <div class="overflow-x-auto"><table class="w-full data-table"><tbody id="t_eps"></tbody></table></div>
+                        <div class="header-title text-[#8B7355]"><span>EPS (由左至右時序)</span></div>
+                        <div class="h-60 mb-4"><canvas id="chart_eps"></canvas></div>
+                        <div class="overflow-x-auto border rounded border-gray-100"><table class="w-full data-table"><tbody id="t_eps"></tbody></table></div>
                     </div>
                     <div class="glass-panel p-6">
-                        <div class="header-title text-[#8B7355]"><span>月營收動能 (由左至右)</span></div>
-                        <div class="h-56 mb-4"><canvas id="chart_rev"></canvas></div>
-                        <div class="overflow-x-auto"><table class="w-full data-table"><tbody id="t_rev"></tbody></table></div>
+                        <div class="header-title text-[#8B7355]"><span>月營收動能 (由左至右時序)</span></div>
+                        <div class="h-60 mb-4"><canvas id="chart_rev"></canvas></div>
+                        <div class="overflow-x-auto border rounded border-gray-100"><table class="w-full data-table"><tbody id="t_rev"></tbody></table></div>
                     </div>
                 </div>
 
                 <div class="glass-panel p-6">
-                    <div class="header-title text-[#8B7355]">PE 河流圖 (區間填充與數值)</div>
+                    <div class="header-title text-[#8B7355]">
+                        PE 河流圖 (區間全填充)
+                        <div id="pe_labels" class="flex gap-4 text-sm font-mono font-bold ml-auto"></div>
+                    </div>
                     <div class="h-[500px] w-full"><canvas id="chart_river"></canvas></div>
                 </div>
 
                 <div class="glass-panel p-6 border-l-[8px] border-[#8B7355]">
-                    <div class="header-title text-[#8B7355]"><span>技術預測</span><span id="d_c" class="text-sm">--</span></div>
+                    <div class="header-title text-[#8B7355]"><span>技術預測與策略</span><span id="d_c" class="text-sm">--</span></div>
                     <p class="text-lg text-gray-700 mb-6 leading-relaxed" id="d_tech_txt">--</p>
                     <div class="grid grid-cols-4 gap-4 text-center">
-                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">30D</div><div id="p_30" class="text-xl font-bold">--</div></div>
-                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">180D</div><div id="p_180" class="text-xl font-bold">--</div></div>
-                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">360D</div><div id="p_360" class="text-xl font-bold">--</div></div>
-                        <div class="p-4 border border-[#8B7355] bg-[#FFFBF0] rounded font-mono"><div class="text-xs text-[#8B7355] font-bold">進場</div><div id="p_entry" class="text-2xl font-black text-[#C0392B]">--</div></div>
+                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">30D</div><div id="p_30" class="text-xl font-bold text-blue-600">--</div></div>
+                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">180D</div><div id="p_180" class="text-xl font-bold text-blue-600">--</div></div>
+                        <div class="p-4 border rounded bg-white font-mono"><div class="text-xs text-gray-400">360D</div><div id="p_360" class="text-xl font-bold text-blue-600">--</div></div>
+                        <div class="p-4 border border-[#8B7355] bg-[#FFFBF0] rounded font-mono"><div class="text-xs text-[#8B7355] font-bold">進場區</div><div id="p_entry" class="text-2xl font-black text-[#C0392B]">--</div></div>
                     </div>
                 </div>
             </div>
@@ -149,14 +144,13 @@
     </div>
 
     <script>
-        // 設定 Chart.js 全域字體大小
+        // 設定全域圖表字體
         Chart.defaults.font.size = 14;
 
         let db = [];
         let currentStockId = null;
         let chartInstances = { river: null, eps: null, rev: null };
 
-        // 以下維持核心邏輯完全不動
         const GITHUB_TOKEN = "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";
         const GITHUB_USER = "Mocha-lin"; 
         const GITHUB_REPO = "-3";
@@ -186,8 +180,7 @@
                             db.unshift(cloudItem);
                         }
                     });
-                    saveToLocal();
-                    renderSidebar();
+                    saveToLocal(); renderSidebar();
                     if(currentStockId) loadStock(currentStockId);
                     badge.innerHTML = "Online";
                 }
@@ -242,6 +235,7 @@
             document.getElementById('d_memo').value = s.memo || "";
             document.getElementById('d_memo').oninput = function() { s.memo = this.value; saveToLocal(); };
 
+            // 表格資料保持不反轉（方便閱讀最新資料在最底），圖表才反轉
             renderEditableTable('t_eps', s.financials.eps_table || [], ['period','gross_margin','net_margin','eps','cumulative']);
             renderEditableTable('t_rev', (s.financials.revenue_trend||[]).slice(0,12), ['month','revenue','mom','yoy']);
 
@@ -276,39 +270,43 @@
         }
 
         function renderCharts(s) {
-            // 1. 河流圖 (修正色帶填充與備註)
+            // 1. PE 河流圖 (全區間填充與數值標籤)
             const ctxRiver = document.getElementById('chart_river').getContext('2d');
             if (chartInstances.river) chartInstances.river.destroy();
             const rd = s.financials.valuation.pe_river_data;
             if(rd) {
+                // 顯示標題數值標籤
+                document.getElementById('pe_labels').innerHTML = `
+                    <span class="text-red-600">PE20: ${rd.pe20[rd.pe20.length-1]}</span>
+                    <span class="text-orange-500">PE16: ${rd.pe16[rd.pe16.length-1]}</span>
+                    <span class="text-green-600">PE12: ${rd.pe12[rd.pe12.length-1]}</span>
+                `;
+
                 chartInstances.river = new Chart(ctxRiver, {
                     type: 'line',
                     data: {
                         labels: rd.dates,
                         datasets: [
                             { label: 'Price', data: rd.price, borderColor:'#374151', borderWidth:3, pointRadius:0, fill:false, z:10 },
-                            { label: 'PE20', data: rd.pe20, borderColor:'#DC2626', borderWidth:1, pointRadius:0, fill:false },
-                            { label: 'PE16', data: rd.pe16, borderColor:'#F59E0B', borderWidth:1, pointRadius:0, fill:'-1', backgroundColor:'rgba(220,38,38,0.08)' },
-                            { label: 'PE12', data: rd.pe12, borderColor:'#16A34A', borderWidth:1, pointRadius:0, fill:'-1', backgroundColor:'rgba(245,158,11,0.12)' }
+                            { label: 'PE20', data: rd.pe20, borderColor:'#DC2626', borderWidth:1, pointRadius:0, fill: 'origin', backgroundColor: 'rgba(220, 38, 38, 0.08)' },
+                            { label: 'PE16', data: rd.pe16, borderColor:'#F59E0B', borderWidth:1, pointRadius:0, fill: 'origin', backgroundColor: 'rgba(245, 158, 11, 0.12)' },
+                            { label: 'PE12', data: rd.pe12, borderColor:'#16A34A', borderWidth:1, pointRadius:0, fill: 'origin', backgroundColor: 'rgba(22, 163, 74, 0.18)' }
                         ]
                     },
                     options: { 
                         responsive:true, maintainAspectRatio:false,
-                        plugins: {
-                            legend: { position: 'top' }
-                        },
-                        scales: {
-                            y: { ticks: { font: { size: 14 } } },
-                            x: { ticks: { font: { size: 12 } } }
-                        }
+                        plugins: { legend: { display: false } },
+                        scales: { x: { ticks: { maxRotation: 45 } } }
                     }
                 });
             }
 
-            // 2. EPS (時序由左至右：Reverse Array)
+            // 2. EPS 圖 (時序反轉：由左至右)
             const ctxEps = document.getElementById('chart_eps').getContext('2d');
             if(chartInstances.eps) chartInstances.eps.destroy();
-            const eD = [...(s.financials.eps_table || [])].reverse(); // 複製並反轉
+            let eD = [...(s.financials.eps_table || [])];
+            if (eD.length > 1 && eD[0].period > eD[eD.length-1].period) eD.reverse();
+
             chartInstances.eps = new Chart(ctxEps, {
                 type: 'line',
                 data: {
@@ -321,10 +319,12 @@
                 options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}} }
             });
 
-            // 3. 營收 (時序由左至右：Reverse Array)
+            // 3. 營收圖 (時序反轉：由左至右)
             const ctxRev = document.getElementById('chart_rev').getContext('2d');
             if(chartInstances.rev) chartInstances.rev.destroy();
-            const rD = [...(s.financials.revenue_trend||[])].slice(0,12).reverse(); // 複製並反轉
+            let rD = [...(s.financials.revenue_trend||[])].slice(0,12);
+            if (rD.length > 1 && rD[0].month > rD[rD.length-1].month) rD.reverse();
+
             chartInstances.rev = new Chart(ctxRev, {
                 type: 'bar',
                 data: {
