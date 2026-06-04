@@ -3,13 +3,13 @@
     "id": "2330",
     "name": "2330",
     "category": "手動注入",
-    "lastUpdated": "2026-06-03 13:17",
+    "lastUpdated": "2026-06-04 11:55",
     "ai_model": "N/A",
     "memo": "",
     "basicInfo": {
-      "price": "2425.00",
-      "change": "+44.98",
-      "changePercent": "+1.89%"
+      "price": "2385.00",
+      "change": "-40.01",
+      "changePercent": "-1.65%"
     },
     "industry": {},
     "news_events": {
@@ -21,7 +21,7 @@
       "revenue_trend": [],
       "valuation": {
         "pe_status": "-",
-        "pb": "10.675013",
+        "pb": "10.49893",
         "roe": "-",
         "pe_river_data": {
           "dates": [
@@ -50,7 +50,7 @@
             1760.0,
             2135.0,
             2355.0,
-            2425.0
+            2385.0
           ],
           "pe20": [],
           "pe16": [],
@@ -67,13 +67,13 @@
     "id": "2317",
     "name": "2317",
     "category": "手動注入",
-    "lastUpdated": "2026-06-03 13:17",
+    "lastUpdated": "2026-06-04 11:55",
     "ai_model": "N/A",
     "memo": "",
     "basicInfo": {
-      "price": "309.00",
-      "change": "+7.51",
-      "changePercent": "+2.49%"
+      "price": "293.00",
+      "change": "-16.01",
+      "changePercent": "-5.18%"
     },
     "industry": {},
     "news_events": {
@@ -85,7 +85,7 @@
       "revenue_trend": [],
       "valuation": {
         "pe_status": "-",
-        "pb": "2.4348922",
+        "pb": "2.3088138",
         "roe": "-",
         "pe_river_data": {
           "dates": [
@@ -114,7 +114,7 @@
             187.5,
             219.5,
             289.0,
-            309.0
+            293.0
           ],
           "pe20": [],
           "pe16": [],
