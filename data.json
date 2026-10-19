@@ -3,13 +3,13 @@
     "id": "2330",
     "name": "2330",
     "category": "手動注入",
-    "lastUpdated": "2026-10-18 13:01",
+    "lastUpdated": "2026-10-19 16:15",
     "ai_model": "N/A",
     "memo": "",
     "basicInfo": {
-      "price": "2420.00",
-      "change": "-20.01",
-      "changePercent": "-0.82%"
+      "price": "nan",
+      "change": "+nan",
+      "changePercent": "+nan%"
     },
     "industry": {},
     "news_events": {
@@ -67,13 +67,13 @@
     "id": "2317",
     "name": "2317",
     "category": "手動注入",
-    "lastUpdated": "2026-10-18 13:01",
+    "lastUpdated": "2026-10-19 16:15",
     "ai_model": "N/A",
     "memo": "",
     "basicInfo": {
-      "price": "244.00",
-      "change": "+4.50",
-      "changePercent": "+1.88%"
+      "price": "nan",
+      "change": "+nan",
+      "changePercent": "+nan%"
     },
     "industry": {},
     "news_events": {
@@ -85,7 +85,7 @@
       "revenue_trend": [],
       "valuation": {
         "pe_status": "-",
-        "pb": "1.7936957",
+        "pb": "1.7606152",
         "roe": "-",
         "pe_river_data": {
           "dates": [
