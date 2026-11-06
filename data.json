@@ -3,7 +3,7 @@
     "id": "2330",
     "name": "2330",
     "category": "手動注入",
-    "lastUpdated": "2026-11-05 17:09",
+    "lastUpdated": "2026-11-06 16:37",
     "ai_model": "N/A",
     "memo": "",
     "basicInfo": {
@@ -21,7 +21,7 @@
       "revenue_trend": [],
       "valuation": {
         "pe_status": "-",
-        "pb": "8.247301",
+        "pb": "7.8607087",
         "roe": "-",
         "pe_river_data": {
           "dates": [
@@ -50,7 +50,7 @@
             2397.94,
             2480.0,
             2370.0,
-            2260.0
+            2240.0
           ],
           "pe20": [],
           "pe16": [],
@@ -67,7 +67,7 @@
     "id": "2317",
     "name": "2317",
     "category": "手動注入",
-    "lastUpdated": "2026-11-05 17:09",
+    "lastUpdated": "2026-11-06 16:37",
     "ai_model": "N/A",
     "memo": "",
     "basicInfo": {
@@ -85,7 +85,7 @@
       "revenue_trend": [],
       "valuation": {
         "pe_status": "-",
-        "pb": "1.7275348",
+        "pb": "1.650347",
         "roe": "-",
         "pe_river_data": {
           "dates": [
@@ -114,7 +114,7 @@
             250.0,
             251.5,
             245.5,
-            240.0
+            235.0
           ],
           "pe20": [],
           "pe16": [],
